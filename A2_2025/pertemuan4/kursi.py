@@ -1,0 +1,1 @@
+print("Kursi A1    Kursi A2   Kursi A3")
