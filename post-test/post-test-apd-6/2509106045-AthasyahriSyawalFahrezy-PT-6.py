@@ -94,7 +94,6 @@ while sudah_masuk == False:
                 hitung = hitung - 1
             os.system("cls" if os.name == "nt" else "clear")
         else:
-            # cek ketersediaan username di dict
             if nama_baru in akun:
                 os.system("cls" if os.name == "nt" else "clear")
                 print("\nUsername sudah digunakan! Pilih username lain.")
@@ -119,7 +118,6 @@ while sudah_masuk == False:
                         hitung = hitung - 1
                     os.system("cls" if os.name == "nt" else "clear")
                 else:
-                    # simpan ke dict akun
                     akun[nama_baru] = sandi_baru
                     os.system("cls" if os.name == "nt" else "clear")
                     print("\nRegister berhasil! Silakan login.")
@@ -185,7 +183,6 @@ while True:
 
         pilih_cari = input("\nPilih jenis pencarian (1-4): ")
 
-        # Ambil list musik milik pengguna aktif dari dict
         lagu_saya = lagu.get(pengguna_aktif, [])
 
         # ERROR HANDLING (JIKA BELUM ADA DATA MUSIK)
@@ -378,7 +375,6 @@ while True:
         print("EDIT MUSIK")
         print("=" * 60)
 
-        # Ambil list musik user dari dict
         lagu_saya = lagu.get(pengguna_aktif, [])
 
         # ERROR HANDLING (tidak ada data musik, takda yang bisa di edit)
