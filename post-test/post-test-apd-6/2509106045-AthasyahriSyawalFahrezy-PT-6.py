@@ -1,11 +1,22 @@
 import os
 import time
 
-akun = [["pares", "045"]] # LIST MENYIMPAN DATA LOGIN DAN REGISTER
+akun = {"pares": "045"}  # DICT MENYIMPAN DATA LOGIN DAN REGISTER
 
-lagu = [["pares", "Bohemian Rhapsody", "Queen", "Rock"]] # LIST SIMPAN DATA MUSIK
+lagu = {
+    "pares": [{"judul": "Bohemian Rhapsody", "artis": "Queen", "genre": "Rock"}]
+}  # DICT SIMPAN DATA MUSIK
 
-genre = ["Pop", "Rock", "Jazz", "Hip-Hop", "Electronic", "Classical", "R&B", "Country"] # LIST MENYIMPAN GENRE
+genre = {
+    1: "Pop",
+    2: "Rock",
+    3: "Jazz",
+    4: "Hip-Hop",
+    5: "Electronic",
+    6: "Classical",
+    7: "R&B",
+    8: "Country",
+}  # DICT MENYIMPAN GENRE
 
 pengguna_aktif = ""
 
@@ -36,15 +47,10 @@ while sudah_masuk == False:
         sandi = input("Password: ")
 
         dapatakun = False
-        i = 0
 
-        while i < len(akun):
-            if akun[i][0] == nama:
-                if akun[i][1] == sandi:
-                    dapatakun = True
-                    pengguna_aktif = akun[i][0]
-                    break
-            i = i + 1
+        if nama in akun and akun[nama] == sandi:
+            dapatakun = True
+            pengguna_aktif = nama
 
         if dapatakun == True:
             sudah_masuk = True
@@ -88,14 +94,8 @@ while sudah_masuk == False:
                 hitung = hitung - 1
             os.system("cls" if os.name == "nt" else "clear")
         else:
-            ada = False
-            i = 0
-            while i < len(akun):
-                if akun[i][0] == nama_baru:
-                    ada = True
-                    break
-                i = i + 1
-            if ada == True:
+            # cek ketersediaan username di dict
+            if nama_baru in akun:
                 os.system("cls" if os.name == "nt" else "clear")
                 print("\nUsername sudah digunakan! Pilih username lain.")
                 print("\nBalik ke halaman sebelumnya...")
@@ -119,7 +119,8 @@ while sudah_masuk == False:
                         hitung = hitung - 1
                     os.system("cls" if os.name == "nt" else "clear")
                 else:
-                    akun.append([nama_baru, sandi_baru])
+                    # simpan ke dict akun
+                    akun[nama_baru] = sandi_baru
                     os.system("cls" if os.name == "nt" else "clear")
                     print("\nRegister berhasil! Silakan login.")
                     print("\nBalik ke halaman sebelumnya...")
@@ -129,7 +130,7 @@ while sudah_masuk == False:
                         time.sleep(1)
                         hitung = hitung - 1
                     os.system("cls" if os.name == "nt" else "clear")
-    # REGISTER END
+        # REGISTER END
 
     # LOGOUT START
     elif pilih == "3":
@@ -139,7 +140,7 @@ while sudah_masuk == False:
         print("=" * 60)
         exit()
     # LOGOUT END
-    
+
     # ERROR HANDLING
     else:
         os.system("cls" if os.name == "nt" else "clear")
@@ -184,13 +185,8 @@ while True:
 
         pilih_cari = input("\nPilih jenis pencarian (1-4): ")
 
-        lagu_saya = []
-
-        i = 0
-        while i < len(lagu):
-            if lagu[i][0] == pengguna_aktif:
-                lagu_saya.append(lagu[i])
-            i = i + 1
+        # Ambil list musik milik pengguna aktif dari dict
+        lagu_saya = lagu.get(pengguna_aktif, [])
 
         # ERROR HANDLING (JIKA BELUM ADA DATA MUSIK)
         if len(lagu_saya) == 0:
@@ -214,9 +210,9 @@ while True:
                 for l in lagu_saya:
                     print("\nMusik", no)
                     print("-" * 40)
-                    print("Judul  :", l[1])
-                    print("Artist :", l[2])
-                    print("Genre  :", l[3])
+                    print("Judul  :", l["judul"])
+                    print("Artist :", l["artis"])
+                    print("Genre  :", l["genre"])
                     no = no + 1
 
                 input("\nTekan Enter untuk kembali...")
@@ -232,9 +228,8 @@ while True:
                 print("=" * 60)
 
                 hasil = []
-
                 for l in lagu_saya:
-                    if kata_kunci.lower() in l[1].lower():
+                    if kata_kunci.lower() in l["judul"].lower():
                         hasil.append(l)
 
                 if len(hasil) == 0:
@@ -244,9 +239,9 @@ while True:
                     for l in hasil:
                         print("\nMusik", no)
                         print("-" * 40)
-                        print("Judul  :", l[1])
-                        print("Artist :", l[2])
-                        print("Genre  :", l[3])
+                        print("Judul  :", l["judul"])
+                        print("Artist :", l["artis"])
+                        print("Genre  :", l["genre"])
                         no = no + 1
 
                 input("\nTekan Enter untuk kembali...")
@@ -262,9 +257,8 @@ while True:
                 print("=" * 60)
 
                 hasil = []
-
                 for l in lagu_saya:
-                    if kata_kunci.lower() in l[2].lower():
+                    if kata_kunci.lower() in l["artis"].lower():
                         hasil.append(l)
 
                 if len(hasil) == 0:
@@ -274,9 +268,9 @@ while True:
                     for l in hasil:
                         print("\nMusik", no)
                         print("-" * 40)
-                        print("Judul  :", l[1])
-                        print("Artist :", l[2])
-                        print("Genre  :", l[3])
+                        print("Judul  :", l["judul"])
+                        print("Artist :", l["artis"])
+                        print("Genre  :", l["genre"])
                         no = no + 1
 
                 input("\nTekan Enter untuk kembali...")
@@ -292,9 +286,8 @@ while True:
                 print("=" * 60)
 
                 hasil = []
-
                 for l in lagu_saya:
-                    if kata_kunci.lower() in l[3].lower():
+                    if kata_kunci.lower() in l["genre"].lower():
                         hasil.append(l)
 
                 if len(hasil) == 0:
@@ -304,9 +297,9 @@ while True:
                     for l in hasil:
                         print("\nMusik", no)
                         print("-" * 40)
-                        print("Judul  :", l[1])
-                        print("Artist :", l[2])
-                        print("Genre  :", l[3])
+                        print("Judul  :", l["judul"])
+                        print("Artist :", l["artis"])
+                        print("Genre  :", l["genre"])
                         no = no + 1
 
                 input("\nTekan Enter untuk kembali...")
@@ -324,81 +317,58 @@ while True:
                     hitung = hitung - 1
     # LIHAT/CARI MUSIK END
 
-    # TAMBAH MUSIK START
+    # TAMBAH MUSIK START 
     elif menu == "2":
-        os.system("cls" if os.name == "nt" else "clear")
-        print("=" * 60)
-        print("TAMBAH MUSIK BARU")
-        print("=" * 60)
+        while True:
+            print("\n=== TAMBAH MUSIK BARU ===")
 
-        judul = input("\nJudul Lagu     : ")
-
-        # ERROR HANDLING (Judul lagu yang di inputkan kosong)
-        if judul == "":
-            os.system("cls" if os.name == "nt" else "clear")
-            print("\nJudul lagu tidak boleh kosong!")
-            print("\nBalik ke halaman sebelumnya...")
-            hitung = 3
-            while hitung > 0:
-                print(hitung, "...")
-                time.sleep(1)
-                hitung = hitung - 1
-        else:
-            artis = input("Nama Artist    : ")
-
-            # ERROR HANDLING (Artis lagu yang di inputkan kosong)
-            if artis == "":
+            judul = input("Judul Lagu : ").strip()
+            if not judul:
                 os.system("cls" if os.name == "nt" else "clear")
-                print("\nNama artist tidak boleh kosong!")
-                print("\nBalik ke halaman sebelumnya...")
-                hitung = 3
-                while hitung > 0:
-                    print(hitung, "...")
-                    time.sleep(1)
-                    hitung = hitung - 1
-            else:
-                print("\nPilih Genre:")
-                i = 0
-                while i < len(genre):
-                    print(str(i + 1) + ".", genre[i])
-                    i = i + 1
+                print("Judul tidak boleh kosong.\n")
+                continue
+            if judul.isdigit():
+                os.system("cls" if os.name == "nt" else "clear")
+                print("Judul tidak boleh hanya angka.\n")
+                continue
 
-                pilih_genre = input("\nPilih nomor genre: ")
+            artis = input("Nama Artist: ").strip()
+            if not artis:
+                os.system("cls" if os.name == "nt" else "clear")
+                print("Artist tidak boleh kosong.\n")
+                continue
+            if artis.isdigit():
+                os.system("cls" if os.name == "nt" else "clear")
+                print("Artist tidak boleh hanya angka.\n")
+                continue
 
-                # ERROR HANDLING (Genre lagu yang di inputkan selain angka)
-                if pilih_genre.isdigit() == False:
-                    os.system("cls" if os.name == "nt" else "clear")
-                    print("\nInput harus berupa angka!")
-                    print("\nBalik ke halaman sebelumnya...")
-                    hitung = 3
-                    while hitung > 0:
-                        print(hitung, "...")
-                        time.sleep(1)
-                        hitung = hitung - 1
-                else:
-                    indeks = int(pilih_genre) - 1
+            print("\nPilih Genre:")
+            for i in range(1, len(genre) + 1):
+                print(f"{i}. {genre[i]}")
+            pilih_genre = input("Nomor genre: ").strip()
 
-                    # ERROR HANDLING (Genre lagu yang di inputkan tidak sesuai nomor genre yang tersedia)
-                    if indeks < 0 or indeks >= len(genre):
-                        os.system("cls" if os.name == "nt" else "clear")
-                        print("\nNomor tidak valid!")
-                        print("\nBalik ke halaman sebelumnya...")
-                        hitung = 3
-                        while hitung > 0:
-                            print(hitung, "...")
-                            time.sleep(1)
-                            hitung = hitung - 1
-                    else:
-                        genre_dipilih = genre[indeks]
-                        lagu.append([pengguna_aktif, judul, artis, genre_dipilih])
-                        os.system("cls" if os.name == "nt" else "clear")
-                        print("\nMusik berhasil ditambahkan!")
-                        print("\nLoading...")
-                        hitung = 3
-                        while hitung > 0:
-                            print(hitung, "...")
-                            time.sleep(1)
-                            hitung = hitung - 1
+            if not pilih_genre.isdigit():
+                print("masukkan angka.\n")
+                continue
+
+            indeks = int(pilih_genre)
+            if indeks < 1 or indeks > len(genre):
+                print("nomor genre tidak valid.\n")
+                continue
+
+            genre_dipilih = genre[indeks]
+
+            if pengguna_aktif not in lagu:
+                lagu[pengguna_aktif] = []
+            lagu[pengguna_aktif].append(
+                {"judul": judul, "artis": artis, "genre": genre_dipilih}
+            )
+
+            print("\nMusik berhasil ditambahkan!\n")
+
+            lagi = input("Tambah musik lagi? (y/n): ").strip().lower()
+            if lagi != "y":
+                break
     # TAMBAH MUSIK END
 
     # EDIT MUSIK START
@@ -408,13 +378,8 @@ while True:
         print("EDIT MUSIK")
         print("=" * 60)
 
-        lagu_saya = []
-
-        i = 0
-        while i < len(lagu):
-            if lagu[i][0] == pengguna_aktif:
-                lagu_saya.append(lagu[i])
-            i = i + 1
+        # Ambil list musik user dari dict
+        lagu_saya = lagu.get(pengguna_aktif, [])
 
         # ERROR HANDLING (tidak ada data musik, takda yang bisa di edit)
         if len(lagu_saya) == 0:
@@ -430,7 +395,7 @@ while True:
             print("\nDaftar Musik:")
             no = 1
             for l in lagu_saya:
-                print(no, ".", l[1], "-", l[2])
+                print(no, ".", l["judul"], "-", l["artis"])
                 no = no + 1
 
             pilih_edit = input("\nPilih nomor musik yang mau diedit: ")
@@ -458,33 +423,25 @@ while True:
                         hitung = hitung - 1
                 else:
                     terpilih = lagu_saya[indeks]
-                    indeks_asli = 0
-
-                    i = 0
-                    while i < len(lagu):
-                        if lagu[i] == terpilih:
-                            indeks_asli = i
-                            break
-                        i = i + 1
 
                     print(
                         "\nMasukkan data baru (tekan Enter jika tidak ingin mengubah):"
                     )
 
-                    judul_baru = input("Judul Lagu [" + lagu[indeks_asli][1] + "]: ")
+                    judul_baru = input("Judul Lagu [" + terpilih["judul"] + "]: ")
                     if judul_baru != "":
-                        lagu[indeks_asli][1] = judul_baru
+                        terpilih["judul"] = judul_baru
 
-                    artis_baru = input("Nama Artist [" + lagu[indeks_asli][2] + "]: ")
+                    artis_baru = input("Nama Artist [" + terpilih["artis"] + "]: ")
                     if artis_baru != "":
-                        lagu[indeks_asli][2] = artis_baru
+                        terpilih["artis"] = artis_baru
 
                     print("\nPilih Genre Baru:")
-                    i = 0
-                    while i < len(genre):
-                        print(str(i + 1) + ".", genre[i])
+                    i = 1
+                    while i <= len(genre):
+                        print(str(i) + ".", genre[i])
                         i = i + 1
-                    print("Genre sekarang:", lagu[indeks_asli][3])
+                    print("Genre sekarang:", terpilih["genre"])
 
                     genre_baru = input(
                         "Pilih nomor genre (atau Enter untuk tidak ubah): "
@@ -494,12 +451,12 @@ while True:
                         if genre_baru.isdigit() == False:
                             print("\nInput harus berupa angka! Genre tidak diubah.")
                         else:
-                            indeks_genre = int(genre_baru) - 1
+                            indeks_genre = int(genre_baru)
 
-                            if indeks_genre < 0 or indeks_genre >= len(genre):
+                            if indeks_genre < 1 or indeks_genre > len(genre):
                                 print("\nNomor tidak valid! Genre tidak diubah.")
                             else:
-                                lagu[indeks_asli][3] = genre[indeks_genre]
+                                terpilih["genre"] = genre[indeks_genre]
 
                     os.system("cls" if os.name == "nt" else "clear")
                     print("\nMusik berhasil diedit!")
@@ -518,13 +475,7 @@ while True:
         print("HAPUS MUSIK")
         print("=" * 60)
 
-        lagu_saya = []
-
-        i = 0
-        while i < len(lagu):
-            if lagu[i][0] == pengguna_aktif:
-                lagu_saya.append(lagu[i])
-            i = i + 1
+        lagu_saya = lagu.get(pengguna_aktif, [])
 
         if len(lagu_saya) == 0:
             os.system("cls" if os.name == "nt" else "clear")
@@ -539,7 +490,7 @@ while True:
             print("\nDaftar Musik:")
             no = 1
             for l in lagu_saya:
-                print(no, ".", l[1], "-", l[2])
+                print(no, ".", l["judul"], "-", l["artis"])
                 no = no + 1
 
             pilih_hapus = input("\nPilih nomor musik yang mau dihapus: ")
@@ -568,11 +519,11 @@ while True:
                 else:
                     terpilih = lagu_saya[indeks]
                     konfirmasi = input(
-                        "Yakin mau hapus '" + terpilih[1] + "'? (ya/tidak): "
+                        "Yakin mau hapus '" + terpilih["judul"] + "'? (ya/tidak): "
                     )
 
                     if konfirmasi == "ya" or konfirmasi == "Ya" or konfirmasi == "YA":
-                        lagu.remove(terpilih)
+                        del lagu_saya[indeks]
                         os.system("cls" if os.name == "nt" else "clear")
                         print("\nMusik berhasil dihapus!")
                         print("\nLoading...")
