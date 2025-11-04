@@ -1,82 +1,81 @@
 from utils import bersih, loading
 import state
+from rich.console import Console
+from rich.panel import Panel
+from prettytable import PrettyTable
+import questionary
+from questionary import Choice
+
+console = Console()
 
 
 def hapus_musik():
     bersih()
-    print("=" * 60)
-    print("HAPUS MUSIK")
-    print("=" * 60)
+    console.rule("[bold]HAPUS MUSIK[/]")
 
     lagu_saya = state.lagu.get(state.pengguna_aktif, [])
 
     if len(lagu_saya) == 0:
         bersih()
-        print("\nBelum ada musik yang bisa dihapus.")
-        print("\nBalik ke halaman sebelumnya...")
+        console.print("\n[yellow]Belum ada musik yang bisa dihapus.[/]")
+        console.print("\nBalik ke halaman sebelumnya...")
         loading()
         return
 
-    print("\nDaftar Musik:")
-    no = 1
-    for l in lagu_saya:
-        print(no, ".", l["judul"], "-", l["artis"])
-        no += 1
+    table = PrettyTable()
+    table.field_names = ["No", "Judul", "Artist", "Genre"]
+    for i, l in enumerate(lagu_saya, start=1):
+        table.add_row([i, l.get("judul", ""), l.get("artis", ""), l.get("genre", "")])
+    console.print(table)
 
     try:
-        pilih_hapus = input("\nPilih nomor musik yang mau dihapus: ")
+        choices = [
+            Choice(
+                title=f"{i}. {l['judul']} - {l['artis']} ({l['genre']})", value=i - 1
+            )
+            for i, l in enumerate(lagu_saya, start=1)
+        ]
+        indeks = questionary.select(
+            "Pilih musik yang mau dihapus:", choices=choices
+        ).ask()
+        if indeks is None:
+            raise KeyboardInterrupt
     except (KeyboardInterrupt, EOFError):
         bersih()
-        print("\nInput dibatalkan.")
-        print("\nBalik ke halaman sebelumnya...")
-        loading()
-        return
-
-    try:
-        indeks = int(pilih_hapus) - 1
-    except ValueError:
-        bersih()
-        print("\nInput harus berupa angka!")
-        print("\nBalik ke halaman sebelumnya...")
-        loading()
-        return
-
-    if indeks < 0 or indeks >= len(lagu_saya):
-        bersih()
-        print("\nNomor tidak valid!")
-        print("\nBalik ke halaman sebelumnya...")
+        console.print("\n[yellow]Input dibatalkan.[/]")
+        console.print("\nBalik ke halaman sebelumnya...")
         loading()
         return
 
     terpilih = lagu_saya[indeks]
 
     try:
-        konfirmasi = input(
-            f"Yakin mau hapus '{terpilih['judul']}'? (ya/tidak): "
-        ).strip()
+        yakin = questionary.confirm(f"Yakin mau hapus '{terpilih['judul']}'?").ask()
+        if yakin is None:
+            raise KeyboardInterrupt
     except (KeyboardInterrupt, EOFError):
         bersih()
-        print("\nInput dibatalkan.")
-        print("\nBalik ke halaman sebelumnya...")
+        console.print("\n[yellow]Input dibatalkan.[/]")
+        console.print("\nBalik ke halaman sebelumnya...")
         loading()
         return
 
-    if konfirmasi.lower() == "ya":
+    if yakin:
         try:
             del lagu_saya[indeks]
         except Exception:
             bersih()
-            print("\nTerjadi kesalahan saat menghapus.")
-            print("\nBalik ke halaman sebelumnya...")
+            console.print("\n[bold red]Terjadi kesalahan saat menghapus.[/]")
+            console.print("\nBalik ke halaman sebelumnya...")
             loading()
             return
 
         bersih()
-        print("\nMusik berhasil dihapus!")
-        print("\nLoading...")
+        console.print(Panel.fit("[bold green]Musik berhasil dihapus![/]"))
+        console.print("\nLoading...")
         loading()
     else:
         bersih()
-        print("\nPenghapusan dibatalkan.")
-        print("\nBalik ke halaman sebelumnya...")
+        console.print("\n[yellow]Penghapusan dibatalkan.[/]")
+        console.print("\nBalik ke halaman sebelumnya...")
         loading()

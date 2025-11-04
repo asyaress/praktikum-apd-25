@@ -1,35 +1,43 @@
 from utils import bersih, loading
 import state
+from rich.console import Console
+from rich.panel import Panel
+from prettytable import PrettyTable
+import questionary
+from questionary import Choice
+
+console = Console()
+
+
+def _print_table(daftar):
+    table = PrettyTable()
+    table.field_names = ["No", "Judul", "Artist", "Genre"]
+    for i, l in enumerate(daftar, start=1):
+        table.add_row([i, l.get("judul", ""), l.get("artis", ""), l.get("genre", "")])
+    console.print(table)
 
 def cetak_lagu_rekursif(daftar, i=0):
-    if i == len(daftar):
-        return
-    l = daftar[i]
-    print(f"\nMusik {i+1}")
-    print("-" * 40)
-    print("Judul  :", l.get("judul", ""))
-    print("Artist :", l.get("artis", ""))
-    print("Genre  :", l.get("genre", ""))
-    cetak_lagu_rekursif(daftar, i + 1)
+    _print_table(daftar)
+
 
 def lihat_cari_musik():
     bersih()
-    print("=" * 60)
-    print("LIHAT/CARI MUSIK")
-    print("=" * 60)
+    console.rule("[bold]LIHAT/CARI MUSIK[/]")
 
-    print("\n--- PILIHAN PENCARIAN ---")
-    print("1. Lihat semua musik")
-    print("2. Cari berdasarkan judul")
-    print("3. Cari berdasarkan artist")
-    print("4. Cari berdasarkan genre")
+    pilih_cari = questionary.select(
+        "Pilih jenis pencarian:",
+        choices=[
+            Choice("Lihat semua musik", 1),
+            Choice("Cari berdasarkan judul", 2),
+            Choice("Cari berdasarkan artist", 3),
+            Choice("Cari berdasarkan genre", 4),
+        ],
+    ).ask()
 
-    try:
-        pilih_cari = int(input("\nPilih jenis pencarian (1-4): "))
-    except ValueError:
+    if pilih_cari is None:
         bersih()
-        print("\nInput harus angka 1-4.")
-        print("\nBalik ke halaman sebelumnya...")
+        console.print("\n[yellow]Aksi dibatalkan.[/]")
+        console.print("\nBalik ke halaman sebelumnya...")
         loading()
         return
 
@@ -37,50 +45,48 @@ def lihat_cari_musik():
 
     if not lagu_saya:
         bersih()
-        print("\nBelum ada musik yang tersimpan.")
-        print("\nBalik ke halaman sebelumnya...")
+        console.print("\n[yellow]Belum ada musik yang tersimpan.[/]")
+        console.print("\nBalik ke halaman sebelumnya...")
         loading()
         return
 
     if pilih_cari == 1:
         bersih()
-        print("=" * 60)
-        print("SEMUA MUSIK")
-        print("=" * 60)
-        cetak_lagu_rekursif(lagu_saya)
+        console.rule("[bold]SEMUA MUSIK[/]")
+        _print_table(lagu_saya)
         input("\nTekan Enter untuk kembali...")
 
     elif pilih_cari in (2, 3, 4):
         field_map = {2: "judul", 3: "artis", 4: "genre"}
         field = field_map[pilih_cari]
 
-        try:
-            kata_kunci = input(f"\nMasukkan keyword {field}: ").strip()
-            if not kata_kunci:
-                raise ValueError("Keyword tidak boleh kosong.")
-        except ValueError as e:
-            bersih()
-            print(f"\n{e}")
-            print("\nBalik ke halaman sebelumnya...")
-            loading()
-            return
+        while True:
+            kata_kunci = questionary.text(f"Masukkan keyword {field}:").ask()
+            if kata_kunci is None:
+                bersih()
+                console.print("\n[yellow]Input dibatalkan.[/]")
+                console.print("\nBalik ke halaman sebelumnya...")
+                loading()
+                return
+            kata_kunci = kata_kunci.strip()
+            if kata_kunci:
+                break
+            console.print("[yellow]Keyword tidak boleh kosong.[/]")
 
         bersih()
-        print("=" * 60)
-        print(f"HASIL PENCARIAN {field.upper()}")
-        print("=" * 60)
+        console.rule(f"[bold]HASIL PENCARIAN {field.upper()}[/]")
 
         hasil = [l for l in lagu_saya if kata_kunci.lower() in l[field].lower()]
 
         if not hasil:
-            print("\nTidak ada musik yang cocok.")
+            console.print("\n[yellow]Tidak ada musik yang cocok.[/]")
         else:
-            cetak_lagu_rekursif(hasil)
+            _print_table(hasil)
 
         input("\nTekan Enter untuk kembali...")
 
     else:
         bersih()
-        print("\nPilihan tidak valid!")
-        print("\nBalik ke halaman sebelumnya...")
+        console.print(Panel.fit("[bold red]Pilihan tidak valid![/]"))
+        console.print("\nBalik ke halaman sebelumnya...")
         loading()

@@ -1,92 +1,110 @@
 from utils import bersih, loading
 import state
+from rich.console import Console
+from rich.panel import Panel
+import questionary
+from prettytable import PrettyTable
+
+console = Console()
+
 
 def edit_musik():
     bersih()
-    print("=" * 60)
-    print("EDIT MUSIK")
-    print("=" * 60)
+    console.rule("[bold]EDIT MUSIK[/]")
 
     lagu_saya = state.lagu.get(state.pengguna_aktif, [])
 
     if len(lagu_saya) == 0:
         bersih()
-        print("\nBelum ada musik yang bisa diedit.")
-        print("\nBalik ke halaman sebelumnya...")
+        console.print("\n[yellow]Belum ada musik yang bisa diedit.[/]")
+        console.print("\nBalik ke halaman sebelumnya...")
         loading()
         return
 
-    print("\nDaftar Musik:")
-    no = 1
-    for l in lagu_saya:
-        print(no, ".", l["judul"], "-", l["artis"])
-        no += 1
+    table = PrettyTable()
+    table.field_names = ["No", "Judul", "Artist", "Genre"]
+    for i, l in enumerate(lagu_saya, start=1):
+        table.add_row([i, l.get("judul", ""), l.get("artis", ""), l.get("genre", "")])
+    console.print(table)
 
     try:
-        pilih_edit = input("\nPilih nomor musik yang mau diedit: ")
-    except (KeyboardInterrupt, EOFError):
+        choices = [
+            f"{i}. {l['judul']} - {l['artis']} ({l['genre']})"
+            for i, l in enumerate(lagu_saya, start=1)
+        ]
+        selected = questionary.select(
+            "Pilih musik yang mau diedit:", choices=choices
+        ).ask()
+        if selected is None:
+            raise KeyboardInterrupt
+        indeks = int(selected.split(". ", 1)[0]) - 1
+    except (ValueError, KeyboardInterrupt, EOFError):
         bersih()
-        print("\nInput dibatalkan.")
-        print("\nBalik ke halaman sebelumnya...")
-        loading()
-        return
-
-    try:
-        indeks = int(pilih_edit) - 1
-    except ValueError:
-        bersih()
-        print("\nInput harus berupa angka!")
-        print("\nBalik ke halaman sebelumnya...")
-        loading()
-        return
-
-    if indeks < 0 or indeks >= len(lagu_saya):
-        bersih()
-        print("\nNomor tidak valid!")
-        print("\nBalik ke halaman sebelumnya...")
+        console.print("\n[yellow]Input dibatalkan.[/]")
+        console.print("\nBalik ke halaman sebelumnya...")
         loading()
         return
 
     terpilih = lagu_saya[indeks]
 
     try:
-        print("\nMasukkan data baru (tekan Enter jika tidak ingin mengubah):")
-        judul_baru = input("Judul Lagu [" + terpilih["judul"] + "]: ")
-        if judul_baru != "":
-            terpilih["judul"] = judul_baru
+        console.print("\nMasukkan data baru (Enter untuk mempertahankan nilai):")
 
-        artis_baru = input("Nama Artist [" + terpilih["artis"] + "]: ")
-        if artis_baru != "":
-            terpilih["artis"] = artis_baru
+        judul_baru = questionary.text(
+            f"Judul Lagu [{terpilih['judul']}]:", default=terpilih["judul"]
+        ).ask()
+        if judul_baru is None:
+            raise KeyboardInterrupt
+        if judul_baru.strip() == "":
+            judul_baru = terpilih["judul"]
 
-        print("\nPilih Genre Baru:")
-        i = 1
-        while i <= len(state.genre):
-            print(str(i) + ".", state.genre[i])
-            i += 1
-        print("Genre sekarang:", terpilih["genre"])
+        artis_baru = questionary.text(
+            f"Nama Artist [{terpilih['artis']}]:", default=terpilih["artis"]
+        ).ask()
+        if artis_baru is None:
+            raise KeyboardInterrupt
+        if artis_baru.strip() == "":
+            artis_baru = terpilih["artis"]
 
-        genre_baru = input("Pilih nomor genre (atau Enter untuk tidak ubah): ")
+        # Pilih genre baru (opsi pertama: tidak ubah)
+        genre_choices = [f"Tidak ubah (tetap: {terpilih['genre']})"] + [
+            f"{i}. {state.genre[i]}" for i in range(1, len(state.genre) + 1)
+        ]
+        gsel = questionary.select("Pilih Genre Baru:", choices=genre_choices).ask()
+        if gsel is None:
+            raise KeyboardInterrupt
 
-        if genre_baru != "":
+        if gsel.startswith("Tidak ubah"):
+            genre_baru = terpilih["genre"]
+        else:
             try:
-                indeks_genre = int(genre_baru)
-            except ValueError:
-                print("\nInput harus berupa angka! Genre tidak diubah.")
-            else:
+                indeks_genre = int(gsel.split(". ", 1)[0])
                 if 1 <= indeks_genre <= len(state.genre):
-                    terpilih["genre"] = state.genre[indeks_genre]
+                    genre_baru = state.genre[indeks_genre]
                 else:
-                    print("\nNomor tidak valid! Genre tidak diubah.")
+                    console.print("\n[yellow]Nomor tidak valid! Genre tidak diubah.[/]")
+                    genre_baru = terpilih["genre"]
+            except Exception:
+                console.print(
+                    "\n[yellow]Input genre tidak valid! Genre tidak diubah.[/]"
+                )
+                genre_baru = terpilih["genre"]
+
+        # Simpan perubahan
+        terpilih["judul"] = judul_baru
+        terpilih["artis"] = artis_baru
+        terpilih["genre"] = genre_baru
 
     except (KeyboardInterrupt, EOFError):
         bersih()
-        print("\nInput dibatalkan. Tidak ada perubahan yang disimpan.")
-        print("\nBalik ke halaman sebelumnya...")
+        console.print(
+            "\n[yellow]Input dibatalkan. Tidak ada perubahan yang disimpan.[/]"
+        )
+        console.print("\nBalik ke halaman sebelumnya...")
         loading()
         return
 
     bersih()
-    print("\nMusik berhasil diedit!")
-    print("\nLoading...")
+    console.print(Panel.fit("[bold green]Musik berhasil diedit![/]"))
+    console.print("\nLoading...")
     loading()
